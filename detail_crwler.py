@@ -4,12 +4,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import chromedriver_autoinstaller
 import subprocess
 import pandas as pd
-import shutil
 
 # 디버깅 모드에서 Chrome 시작
 subprocess.Popen(r'C:\Program Files\Google\Chrome\Application\chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\chrometemp"')
@@ -47,7 +44,7 @@ for url in urls:
         
         # 향수 이름, 성별
         print("---이름, 성별---")
-        elements = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'h1[itemprop="name"]')))
+        elements = driver.find_elements(By.CSS_SELECTOR, 'h1[itemprop="name"]')
         print(elements.text)
             
         product = elements.text.strip()
@@ -96,9 +93,7 @@ for url in urls:
             
         def extract_notes(section_name):
             try:
-                section_header = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, f'//h4/b[text()="{section_name}"]/parent::h4/following-sibling::div'))
-                )
+                section_header = driver.find_elements(By.XPATH, f'//h4/b[text()="{section_name}"]/parent::h4/following-sibling::div')
                 note_divs = section_header.find_elements(By.XPATH, './/div[contains(@style, "margin: 0.2rem")]')
                 notes = [div.text.split('\n')[-1] for div in note_divs if div.text.strip()]
                 notes_string = ', '.join(notes)
