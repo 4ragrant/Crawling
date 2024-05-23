@@ -7,39 +7,41 @@ from selenium.webdriver.chrome.options import Options
 import chromedriver_autoinstaller
 import subprocess
 import pandas as pd
+import shutil
+
+#쿠키/캐시파일 삭제
+try:
+    shutil.rmtree(r"c:\chrometemp")
+except FileNotFoundError:
+    pass
 
 # 디버깅 모드에서 Chrome 시작
 subprocess.Popen(r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\chrometemp"')
-
 # 옵션 설정
 options = Options()
 options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
-
 # Chrome 버전 가져오기
-# chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]
-
+chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]
 # 크롬 드라이버 설정
 chromedriver_autoinstaller.install(True)  # 자동 설치
-# service = Service(f'./{chrome_ver}/chromedriver.exe')
-service = Service()
+service = Service(f'./{chrome_ver}/chromedriver.exe')
 
 try:
     driver = webdriver.Chrome(service=service, options=options)
 except Exception as e:
     print(f"Error: {e}")
 
-# 암묵적 대기 설정
 driver.implicitly_wait(10)
 
 csv_file_path = "item_links.csv"
 urls = pd.read_csv(csv_file_path)["URL"].tolist()
 
+data = []
+
 for url in urls:
     try:    
-    # base_url = "https://www.fragrantica.com/perfume/By-Kilian/Angels-Share-62615.html#all-reviews"
         driver.get(url)
         time.sleep(2)
-        
                     
     # 선호도(5), 계절감(6): 총 11건
     # preference = ["love", "like", "ok", "dislike", "hate"]
@@ -73,6 +75,9 @@ for url in urls:
         
     except Exception as e:
         print(f"에러 발생: {e}")
-                
-#finally:
-#    driver.quit()
+        
+df = pd.DataFrame(data)
+output_csv_file_path = "output_data.csv"
+df.to_csv(output_csv_file_path, index=False, encoding='utf-8-sig')                
+
+driver.quit()
