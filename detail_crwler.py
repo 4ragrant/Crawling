@@ -17,14 +17,9 @@ data = {'Product': [], 'Gender': [], 'Accords': [], 'Description': [], 'Addition
         'TopNotes': [], 'MiddleNotes': [], 'BaseNotes': [], 'love': [], 'like': [], 'ok': [], 'dislike': [], 'hate': [],
         'winter': [], 'spring': [], 'summer': [], 'fall': [], 'day': [], 'night': []}
 
-#with open('2024_1.txt', 'r') as f:
-#    urls = f.read().splitlines()
-
+# 파일 경로 바꾸기
 csv_file_path = "2023.csv"
 urls = pd.read_csv(csv_file_path)["URL"].tolist()
-# urls = ["https://www.fragrantica.com/perfume/Gritti/Mango-Aoud-86927.html"]
-# review_urls = [url + "#all-reviews" for url in urls]
-
 COUNT = 0
 
 def kill_process(name):
@@ -71,7 +66,7 @@ for url in urls:
             print("포트 9223이 사용 중입니다. 다른 포트를 사용하거나 사용 중인 프로세스를 종료하세요.")
             continue
         
-        # Start Chrome with remote debugging
+        # 크롬 경로 바꾸기
         subprocess.Popen(r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe --remote-debugging-port=9223 --user-data-dir="C:\chrometemp"')
 
         # Setup Chrome options for remote debugging
@@ -242,16 +237,13 @@ for url in urls:
         kill_process("chrome.exe")
         delete_folder(r"c:\chrometemp")
         
-        print("5분간 대기합니다.")
-        time.sleep(300)
+        if COUNT % 5 == 0:
+            print("5개 요청이 완료되어 대기합니다.")
+            random_sleep(600, 1000)
         
-        # 10개의 요청마다 6분 대기
-        # if COUNT != 0 and COUNT % 10 == 0:
-        #    print("10개의 요청이 완료되어 6분간 대기합니다.")
-        #    time.sleep(360)
-        
-        if COUNT != 0 and COUNT % 100 == 0:
+        if COUNT != 0 and COUNT % 50 == 0:
             df = pd.DataFrame(data)
+            # 파일 저장 이름 바꾸기
             output_csv_file_path = f"결과데이터_2023_{COUNT}.csv"
 
             try:
@@ -259,14 +251,15 @@ for url in urls:
                 print(f"데이터가 CSV 파일에 저장되었습니다: {output_csv_file_path}")
             except Exception as e:
                 print(f"CSV 파일 저장 중 오류 발생: {e}")
+            
+            print("50개마다 대기")
+            random_sleep(4000, 8000)
 
     except Exception as e:
         print("페이지 가져오기 실패")
         print(e)
         if driver:
             driver.quit()
-
-
 
 # 디버깅: 데이터 프레임을 출력하여 확인
 print("데이터 프레임:\n", df)
